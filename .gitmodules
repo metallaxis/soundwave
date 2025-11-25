@@ -1,0 +1,3 @@
+[submodule "sounds"]
+	path = wav
+	url = https://github.com/progintro/wav.git
