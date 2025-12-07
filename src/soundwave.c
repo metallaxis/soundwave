@@ -22,7 +22,7 @@ void generate(int dur, int sr, double fm, double fc, double mi, double amp);
 
 // Begins with checks for each argument provided and then runs for each correct one
 int main(int argc, char **argv) {
-	if (argc > 1 && strcmp(argv[1], "info") == 0) info(1);
+	if (argc > 1 && strcmp(argv[1], "info") == 0) info();
 	else if (argc > 1 && strcmp(argv[1], "rate") == 0) {
 		if (argc < 3) print_error("You did not enter the amount to modify the rate by!");
 
