@@ -53,7 +53,7 @@ After cloning the repository run the following command:
 make build (windows/linux)
 ```
 
-## Running: 
+## Running
 Go to the build directory that was created from
 ```sh
 make build (windows/linux)
