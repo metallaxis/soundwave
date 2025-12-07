@@ -23,6 +23,7 @@
 
 * Fails safely with clear error messages if input is malformed or parameters are invalid.
 
+* Generate expects the arguments after the -- to also contain a number
 ## Example
 ```
 λ ./soundwave info < ../wav/good.wav
@@ -51,7 +52,8 @@ After cloning the repository run the following command:
 ```sh
 make build (windows/linux)
 ```
-To run use:<br>
+
+## Running: 
 Go to the build directory that was created from
 ```sh
 make build (windows/linux)
