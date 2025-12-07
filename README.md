@@ -1,5 +1,4 @@
-# Soundwave
-## Wav soundfiles
+# Soundwave, Proccess WAV soundfiles
 
 ## How it works
 * Processes WAV audio files via standard input/output (stdin/stdout) for easy shell piping.
