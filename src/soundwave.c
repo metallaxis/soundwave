@@ -26,24 +26,30 @@ int main(int argc, char **argv) {
 	else if (argc > 1 && strcmp(argv[1], "rate") == 0) {
 		if (argc < 3) print_error("You did not enter the amount to modify the rate by!");
 
+		// Checks for the rate argument
 		char *end;
 		double fp_rate = strtod(argv[2], &end);
 		if (strcmp(argv[2], end) == 0 || *end != '\0') print_error("You have not entered a floating number.");
+		if (fp_rate <= 0) print_error("You have entered a non positive floating number");
 		rate(fp_rate);
 	} else if (argc > 1 && strcmp(argv[1], "channel") == 0) {
 		if (argc < 3) print_error("You did not enter the channel you want to use!");
 
+		// Checks for the channel argument
 		if (strcmp(argv[2], "left") != 0 && strcmp(argv[2], "right") != 0)
 			print_error("You have not entered a valid channel!");
 		channel(argv[2]);
 	} else if (argc > 1 && strcmp(argv[1], "volume") == 0) {
 		if (argc < 3) print_error("You did not enter the amount to multiply the volume by!");
 
+		// Checks for the volume argument
 		char *end;
 		double fp_multiplier = strtod(argv[2], &end);
 		if (strcmp(argv[2], end) == 0 || *end != '\0') print_error("You have not entered a floating number.");
+		if (fp_multiplier <= 0) print_error("You have entered a non positive floating number");
 		volume(fp_multiplier);
 	} else if (argc > 1 && strcmp(argv[1], "generate") == 0) {
+		// Default generate arguments
 		int dur = 3;
 		int sr = 44100;
 		double fm = 2.0;
@@ -51,6 +57,8 @@ int main(int argc, char **argv) {
 		double mi = 100.0;
 		double amp = 30000.0;
 
+		// Checks for if the arguments are correct (Expected that the user does not simply add the --dur for example
+		// without then specifying a number!
 		char *end;
 		for (int i = 2; i < argc; i++) {
         		if (strcmp(argv[i], "--dur") == 0) {
@@ -81,6 +89,7 @@ int main(int argc, char **argv) {
 
 		generate(dur, sr, fm, fc, mi, amp);
 	} else {
+		// Default Help message
 		print_message("Help: ");
 		print_message("%s info < (wav file)", argv[0]);
 		print_message("%s rate (rate) < (wav file) > (new modified file)", argv[0]);
@@ -92,6 +101,8 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
+// Check the header and store in a pointer which is later returned and if
+// the entry value is 1 also print the info messages
 unsigned char *header_check(char print) {
 	// Header data size
 	size_t size_of_header = 44;
@@ -161,6 +172,7 @@ unsigned char *header_check(char print) {
 	return header;
 }
 
+// Check if in the end the file has the correct file size
 void filesize_check(size_t size_of_header, size_t size_of_file, size_t size_of_data, size_t size_of_other_data) {
 	if (size_of_file + 8 > size_of_data + size_of_header + size_of_other_data)
 		print_error("Error! insufficient data");
@@ -171,6 +183,7 @@ void filesize_check(size_t size_of_header, size_t size_of_file, size_t size_of_d
 void info() {
 	unsigned char *header = header_check(1);
 
+	// Sizes
 	size_t size_of_header = 44;
 	size_t size_of_file = calculate_size(4, header[4], header[5], header[6], header[7]);
 	size_t size_of_data = calculate_size(4, header[40], header[41], header[42], header[43]);
@@ -182,6 +195,7 @@ void info() {
 	size_t size_of_other_data = 0;
 	while (getchar() != EOF) ++size_of_other_data; // Skip other data (just get their size)
 
+	// Freeing the malloc allocated pointer
 	free(header);
 	filesize_check(size_of_header, size_of_file, size_of_data, size_of_other_data);
 }
@@ -199,6 +213,7 @@ void rate(double fp_rate) {
 		header[i+28] = (new_bytes_per_sec >> (8 * i)) & 0xFF;
 	}
 
+	// Sizes
 	size_t size_of_header = 44;
 	size_t size_of_file = calculate_size(4, header[4], header[5], header[6], header[7]);
 	size_t size_of_data = calculate_size(4, header[40], header[41], header[42], header[43]);
@@ -207,12 +222,14 @@ void rate(double fp_rate) {
 	// Produce the output file info
 	for (size_t i = 0; i < size_of_header; ++i) putchar(header[i]);
 	for (size_t i = 0; i < size_of_data; ++i) putchar(getchar());
+	// Reprint the other data always unchanged
 	int ch;
 	while ((ch = getchar()) != EOF) {
 		putchar(ch);
 		++size_of_other_data;
 	}
 
+	// Freeing the malloc allocated pointer
 	free(header);
 	filesize_check(size_of_header, size_of_file, size_of_data, size_of_other_data);
 }
@@ -220,6 +237,7 @@ void rate(double fp_rate) {
 void channel(char *selected_channel) {
 	unsigned char *header = header_check(0);
 
+	// Sizes
 	size_t size_of_header = 44;
 	size_t size_of_file = calculate_size(4, header[4], header[5], header[6], header[7]);
 	size_t size_of_data = calculate_size(4, header[40], header[41], header[42], header[43]);
@@ -251,20 +269,24 @@ void channel(char *selected_channel) {
 	if (bits_per_sample == 8)
 		for (size_t i = 0; i < new_size_of_data; ++i)
 			if (strcmp(selected_channel, "left") == 0) {
+				// Keep only the bytes for the left channel
 				putchar(getchar());
 				getchar();
 			} else {
+				// Keep only the bytes for the right channel
 				getchar();
 				putchar(getchar());
 			}
 	else // Otherwise it is 16
 		for (size_t i = 0; i < new_size_of_data; i+=2)
 			if (strcmp(selected_channel, "left") == 0) {
+				// Keep only the bytes for the left channel
 				putchar(getchar());
 				putchar(getchar());
 				getchar();
 				getchar();
 			} else {
+				// Keep only the bytes for the right channel
 				getchar();
 				getchar();
 				putchar(getchar());
@@ -272,17 +294,21 @@ void channel(char *selected_channel) {
 			}
 
 	int ch;
+	// Reprint the other data always unchanged
 	while ((ch = getchar()) != EOF) {
 		putchar(ch);
 		++size_of_other_data;
 	}
 
+	// Freeing the malloc allocated pointer
 	free(header);
 	filesize_check(size_of_header, size_of_file, size_of_data, size_of_other_data);
 }
 
 void volume(double fp_multiplier) {
 	unsigned char *header = header_check(0);
+
+	// Sizes
 	size_t size_of_header = 44;
 	size_t size_of_file = calculate_size(4, header[4], header[5], header[6], header[7]);
 	size_t size_of_data = calculate_size(4, header[40], header[41], header[42], header[43]);
@@ -309,17 +335,20 @@ void volume(double fp_multiplier) {
 			putchar((new_data >> 8) & 0xFF);
 		}
 
+	// Reprint the other data always unchanged
 	int ch;
 	while ((ch = getchar()) != EOF) {
 		putchar(ch);
 		++size_of_other_data;
 	}
 
+	// Freeing the malloc allocated pointer
 	free(header);
 	filesize_check(size_of_header, size_of_file, size_of_data, size_of_other_data);
 }
 
 void generate(int dur, int sr, double fm, double fc, double mi, double amp) {
+	// Sizes
 	size_t size_of_header = 44;
 	size_t size_of_data = sr * dur * 2;
 	size_t total_size = size_of_header + size_of_data;
@@ -343,6 +372,7 @@ void generate(int dur, int sr, double fm, double fc, double mi, double amp) {
 
 	// Produce the output header file info
 	for (size_t i = 0; i < size_of_header; ++i) putchar(header[i]);
+	// Freeing the malloc allocated pointer
 	free(header);
 
 	// Create the Data
@@ -362,6 +392,7 @@ size_t calculate_size(size_t count, ...) {
 
 	size_t size = 0;
 	// Do a bitwise shift for all the bytes to convert the bytes into a size_t
+	// after reading the data in a little endian format
 	for (size_t i = 0; i < count; ++i) size|=(va_arg(args, size_t) << (8 * i));
 
 	va_end(args);
