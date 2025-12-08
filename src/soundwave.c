@@ -204,8 +204,9 @@ void rate(double fp_rate) {
 	unsigned char *header = header_check(0);
 
 	// Calculate the new information
-	size_t new_sample_rate = calculate_size(4, header[24], header[25], header[26], header[27]) * fp_rate;
-	size_t new_bytes_per_sec = calculate_size(4, header[28], header[29], header[30], header[31]) * fp_rate;
+	size_t new_sample_rate = round(calculate_size(4, header[24], header[25], header[26], header[27]) * fp_rate);
+	size_t block_align = calculate_size(2, header[32], header[33]);
+	size_t new_bytes_per_sec = new_sample_rate * block_align;
 
 	// Convert the numbers back into unsigned char
 	for (size_t i = 0; i < 4; ++i) {
